@@ -7,16 +7,5 @@ service cloud.firestore {
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
-
-    // Đánh dấu email đã đăng ký (để kiểm tra trùng TRƯỚC khi gửi OTP).
-    // - get: cho phép khi chưa đăng nhập (người dùng đang đăng ký)
-    // - list: cấm, tránh liệt kê toàn bộ email
-    // - create: chỉ khi đã đăng nhập (tức là sau khi tài khoản được tạo)
-    match /registered_emails/{key} {
-      allow get: if true;
-      allow list: if false;
-      allow create: if request.auth != null;
-      allow update, delete: if false;
-    }
   }
 }

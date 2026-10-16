@@ -45,15 +45,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      // Bước 1: kiểm tra email đã có trên Firebase chưa.
-      final exists = await AuthService.instance.isEmailRegistered(email);
-      if (exists) {
-        if (!mounted) return;
-        setState(() => _error = 'Email này đã được đăng ký. Hãy quay lại và đăng nhập.');
-        return;
-      }
-
-      // Bước 2: chưa có -> sinh OTP và gửi về email.
+      // Bước 1: sinh OTP và gửi về email. Email trùng sẽ do Firebase Auth báo
+      // (`email-already-in-use`) ở bước tạo tài khoản sau khi OTP đúng.
       final otp = OtpService.instance.generate(email);
       final bool delivered;
       try {
@@ -71,7 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
 
-      // Bước 3: sang màn nhập OTP. Tài khoản chỉ được tạo SAU KHI OTP đúng.
+      // Bước 2: sang màn nhập OTP. Tài khoản chỉ được tạo SAU KHI OTP đúng.
       final ok = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (_) => OtpScreen(

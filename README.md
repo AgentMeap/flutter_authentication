@@ -10,14 +10,13 @@ Project demo **2 phương thức bảo mật tài khoản**:
 ```
 ĐĂNG KÝ
  Nhập tên + email + mật khẩu
-   └─► Kiểm tra email đã có trên Firebase chưa (Firestore: registered_emails)
-         ├─ Có rồi  ─► báo lỗi, yêu cầu đăng nhập
-         └─ Chưa có ─► sinh OTP 6 số ─► gửi về email (SMTP)
-                          └─► Nhập OTP
-                                ├─ Sai / hết hạn ─► báo lỗi, cho gửi lại
-                                └─ Đúng ─► tạo tài khoản Firebase Auth
-                                           + lưu users/{uid}
-                                           ─► quay về Đăng nhập (email + mật khẩu)
+   └─► sinh OTP 6 số ─► gửi về email (SMTP)
+         └─► Nhập OTP
+               ├─ Sai / hết hạn ─► báo lỗi, cho gửi lại
+               └─ Đúng ─► tạo tài khoản Firebase Auth
+                            ├─ Email đã tồn tại (email-already-in-use) ─► báo lỗi, yêu cầu đăng nhập
+                            └─ Thành công ─► lưu users/{uid}
+                                             ─► quay về Đăng nhập (email + mật khẩu)
 
 ĐĂNG NHẬP
  ├─ Email + mật khẩu  (Firebase Auth)
@@ -132,11 +131,11 @@ flutter test        # chạy unit test OTP
 | 3 | Nhập sai 5 lần | Mã bị huỷ, phải gửi lại |
 | 4 | Chờ quá 5 phút rồi nhập | Báo hết hạn |
 | 5 | Nhập đúng OTP | Tạo tài khoản, quay về màn Đăng nhập (đã điền sẵn email) |
-| 6 | Đăng ký lại cùng email | Báo email đã tồn tại, **không** gửi OTP |
+| 6 | Đăng ký lại cùng email | Nhận OTP; nhập đúng thì báo email đã được đăng ký |
 | 7 | Đăng nhập email + mật khẩu | Vào Trang chủ, thấy hồ sơ từ Firestore |
 | 8 | Đăng xuất → Đăng nhập Google | Vào Trang chủ, hồ sơ Google lưu trên Firestore |
 
-Kiểm chứng dữ liệu trong Firebase Console: **Authentication → Users** và **Firestore → users / registered_emails**.
+Kiểm chứng dữ liệu trong Firebase Console: **Authentication → Users** và **Firestore → users**.
 
 ## Lưu ý bảo mật (quan trọng khi trình bày)
 
@@ -148,6 +147,6 @@ Kiểm chứng dữ liệu trong Firebase Console: **Authentication → Users** 
   hoặc dùng dịch vụ như SendGrid / Firebase Extension *Trigger Email*.
 - App đã làm đúng các nguyên tắc cơ bản: OTP sinh bằng `Random.secure`, chỉ lưu bản **băm + salt**,
   hết hạn, giới hạn số lần thử, dùng một lần, cooldown gửi lại.
-- Collection `registered_emails` chỉ cho `get` (không `list`) để hạn chế dò danh sách email;
-  vẫn có thể bị dò từng email – đánh đổi để có thể kiểm tra trùng trước khi gửi OTP.
+- Firebase Auth là nguồn duy nhất quyết định email đã tồn tại (không lưu bản sao trên Firestore)
+  → xoá user trong Authentication là đăng ký lại được ngay, và không lộ danh sách email qua Firestore.
 - Có thể chạy Android/iOS; **Flutter Web không hỗ trợ** gửi SMTP bằng package `mailer`.

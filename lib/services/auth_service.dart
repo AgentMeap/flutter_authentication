@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -8,9 +6,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 /// Toàn bộ thao tác với Firebase Auth + Firestore.
 ///
 /// Firestore:
-///   users/{uid}                 -> hồ sơ người dùng (chỉ chủ sở hữu đọc/ghi)
-///   registered_emails/{emailKey}-> đánh dấu email đã đăng ký (dùng để kiểm tra trùng
-///                                  TRƯỚC khi gửi OTP; chỉ cho phép `get`, không `list`)
+///   users/{uid} -> hồ sơ người dùng (chỉ chủ sở hữu đọc/ghi)
+///
+/// Việc email đã tồn tại hay chưa do Firebase Auth quyết định (lỗi
+/// `email-already-in-use` khi tạo tài khoản), không lưu bản sao trên Firestore.
 class AuthService {
   AuthService._();
 
@@ -31,19 +30,6 @@ class AuthService {
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> userDocStream(String uid) =>
       _db.collection('users').doc(uid).snapshots();
-
-  // ---------------------------------------------------------------------------
-  // Kiểm tra email đã tồn tại chưa
-  // ---------------------------------------------------------------------------
-
-  /// Doc ID an toàn (không chứa '/') cho một email.
-  static String emailKey(String email) =>
-      base64Url.encode(utf8.encode(email.trim().toLowerCase())).replaceAll('=', '');
-
-  Future<bool> isEmailRegistered(String email) async {
-    final doc = await _db.collection('registered_emails').doc(emailKey(email)).get();
-    return doc.exists;
-  }
 
   // ---------------------------------------------------------------------------
   // Đăng ký email + mật khẩu (gọi SAU KHI OTP đã đúng)
@@ -143,14 +129,6 @@ class AuthService {
       if (isNew) 'createdAt': FieldValue.serverTimestamp(),
     };
     await _db.collection('users').doc(user.uid).set(data, SetOptions(merge: true));
-
-    final email = user.email;
-    if (email != null) {
-      final ref = _db.collection('registered_emails').doc(emailKey(email));
-      if (!(await ref.get()).exists) {
-        await ref.set({'createdAt': FieldValue.serverTimestamp()});
-      }
-    }
   }
 
   // ---------------------------------------------------------------------------

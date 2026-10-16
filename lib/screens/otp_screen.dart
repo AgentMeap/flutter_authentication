@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -84,9 +85,12 @@ class _OtpScreenState extends State<OtpScreen> {
         Navigator.of(context).pop(true);
       } catch (e) {
         if (!mounted) return;
+        final emailTaken = e is FirebaseAuthException && e.code == 'email-already-in-use';
         setState(() {
           _verifying = false;
-          _error = '${AuthService.friendlyError(e)} Hãy gửi lại mã để thử lại.';
+          _error = emailTaken
+              ? 'Email này đã được đăng ký. Hãy quay lại và đăng nhập.'
+              : '${AuthService.friendlyError(e)} Hãy gửi lại mã để thử lại.';
         });
       }
       return;
