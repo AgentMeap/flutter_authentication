@@ -1,0 +1,25 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+/build/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Android / iOS
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+*.jks
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+
+# Cấu hình Firebase riêng của mỗi người, KHÔNG commit
+google-services.json
+GoogleService-Info.plist
+firebase.json
