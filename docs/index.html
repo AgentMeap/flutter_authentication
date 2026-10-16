@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab Authentication: Firebase Google Sign-In và OTP</title>
+<meta name="description" content="Hướng dẫn từng bước tích hợp Google Sign-In (Firebase) và OTP qua email cho ứng dụng Flutter.">
+<style>
+:root{--bg:#fafaf8;--panel:#fff;--ink:#1c2024;--mute:#5c6670;--line:#dfe3e6;--brand:#0f6b6b;--brand-ink:#fff;--soft:#e8f2f1;--code:#f3f5f6;--warn:#fdeceb;--warnb:#c0392b;--info:#eaf2fa;--infob:#2b6cb0;--ok:#2f855a}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#13171a;--panel:#1a1f23;--ink:#e6e9eb;--mute:#9aa5ae;--line:#2c343a;--brand:#4fc3bd;--brand-ink:#0b1315;--soft:#1b2c2c;--code:#10151a;--warn:#2b1a19;--warnb:#e07a6f;--info:#16222e;--infob:#6aa7e0;--ok:#68d391}}
+:root[data-theme=dark]{--bg:#13171a;--panel:#1a1f23;--ink:#e6e9eb;--mute:#9aa5ae;--line:#2c343a;--brand:#4fc3bd;--brand-ink:#0b1315;--soft:#1b2c2c;--code:#10151a;--warn:#2b1a19;--warnb:#e07a6f;--info:#16222e;--infob:#6aa7e0;--ok:#68d391}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--brand);overflow-wrap:anywhere}
+code{font:0.88em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:.1em .35em;border-radius:4px;overflow-wrap:anywhere}
+.top{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 16px}
+.top b{font-size:15px}
+.top .sp{flex:1}
+.bar{height:3px;background:var(--brand);width:0;position:absolute;left:0;bottom:-1px}
+button.ic{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-size:14px}
+button.ic:hover{border-color:var(--brand)}
+.layout{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:230px 1fr;gap:32px;padding:24px 16px 80px}
+nav.side{position:sticky;top:76px;align-self:start;display:flex;flex-direction:column;gap:2px;font-size:14.5px}
+nav.side a{padding:7px 10px;border-radius:8px;text-decoration:none;color:var(--mute);border-left:3px solid transparent}
+nav.side a:hover{background:var(--soft);color:var(--ink)}
+nav.side a.on{color:var(--brand);background:var(--soft);border-left-color:var(--brand);font-weight:600}
+.prog{font-size:13px;color:var(--mute);margin:10px 10px 0}
+main,.layout>div{min-width:0}
+.hero{padding:8px 0 20px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.hero h1{font-size:clamp(26px,4vw,38px);line-height:1.2;margin:0 0 8px}
+.hero p{color:var(--mute);margin:0;max-width:60ch}
+section{padding:8px 0 24px}
+h2{font-size:26px;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+h3{font-size:18px;margin:20px 0 8px}
+h4{font-size:15px;margin:14px 0 6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:14px 0}
+.card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;text-decoration:none;color:var(--ink)}
+.card:hover{border-color:var(--brand)}
+.card h4{margin:6px 0;font-size:17px}
+.card p{margin:0;color:var(--mute);font-size:14.5px}
+.tag{font-size:12px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.04em}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 18px 14px;margin:16px 0;transition:border-color .2s}
+.step.complete{border-color:var(--ok)}
+.step header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.step h3{margin:14px 0 8px;font-size:18px}
+.done{font-size:13.5px;color:var(--mute);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.step.complete .done{color:var(--ok);font-weight:600}
+.note{border-left:4px solid var(--infob);background:var(--info);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:15px}
+.note.warn{border-left-color:var(--warnb);background:var(--warn)}
+.code{position:relative;margin:12px 0}
+.code pre{margin:0;background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.55}
+.code pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+.copy{position:absolute;top:8px;right:8px;font-size:12px;padding:3px 9px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--mute);cursor:pointer}
+.copy:hover{color:var(--ink);border-color:var(--brand)}
+.figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:14px 0}
+figure{margin:0;background:var(--code);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+figure img{display:block;width:100%;height:auto;cursor:zoom-in}
+figcaption{font-size:13px;color:var(--mute);padding:8px 10px}
+.ref{font-size:.85em;font-weight:600;color:var(--brand);background:var(--soft);border-radius:4px;padding:0 5px;white-space:nowrap}
+.tablewrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 14px;margin:12px 0}
+summary{cursor:pointer;font-weight:600;padding:8px 0}
+.expect{background:var(--soft);border-radius:12px;padding:6px 18px 10px;margin:20px 0}
+.checklist{list-style:none;padding:0}
+.checklist li{padding:8px 0;border-bottom:1px solid var(--line)}
+.checklist label{display:flex;gap:10px;cursor:pointer;align-items:flex-start}
+.checklist input{margin-top:6px}
+input[type=checkbox]{accent-color:var(--brand);width:16px;height:16px}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;cursor:zoom-out}
+#lb.open{display:flex}
+#lb img{max-width:100%;max-height:100%;border-radius:6px}
+@media (max-width:860px){.layout{grid-template-columns:1fr}nav.side{position:static;flex-direction:row;overflow-x:auto;padding-bottom:6px}nav.side a{white-space:nowrap;border-left:0;border-bottom:3px solid transparent}nav.side a.on{border-bottom-color:var(--brand)}.prog{display:none}}
+@media print{.top,nav.side,.copy,.done{display:none}.layout{display:block}.step{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="top"><b>Lab Authentication · PRM393</b><span class="sp"></span>
+<button class="ic" id="reset" type="button" title="Xoá các dấu đã xong">Làm lại</button>
+<button class="ic" id="theme" type="button" aria-label="Đổi giao diện sáng/tối">Sáng/Tối</button><div class="bar" id="bar"></div></div>
+<div class="layout">
+<div><nav class="side" id="nav"><a href="#tong-quan">Tổng quan</a><a href="#chuan-bi">Chuẩn bị: clone project</a><a href="#bai-1">Bài tập 1: Google Sign-In</a><a href="#bai-2">Bài tập 2: OTP qua email</a><a href="#checklist">Checklist cuối</a><a href="#loi">Lỗi thường gặp</a></nav><div class="prog" id="prog"></div></div>
+<main>
+<div class="hero"><h1>Firebase Google Sign-In và OTP qua email</h1>
+<p>Hướng dẫn từng bước cho ứng dụng Flutter: clone project, cấu hình Firebase, đăng nhập Google, rồi thêm xác thực OTP khi đăng ký. Bấm vào ảnh để phóng to.</p></div>
+<section id="tong-quan">
+<h2>Tổng quan</h2>
+<p>Hướng dẫn này đi cùng bài lab <strong>Authentication</strong> (Module 10, PRM393). Bạn sẽ <strong>clone một project Flutter có sẵn</strong>, rồi tự cấu hình và chạy theo từng bước. Có <strong>2 bài tập</strong>, kiểm chứng bằng cách chạy app:</p>
+<div class="cards">
+  <a class="card" href="#bai-1"><span class="tag">Bài tập 1</span><h4>Firebase Google Sign-In</h4><p>Tạo Firebase project, bật Authentication, Firestore + Rules, SHA, <code>flutterfire configure</code>, đăng nhập Google.</p></a>
+  <a class="card" href="#bai-2"><span class="tag">Bài tập 2</span><h4>OTP qua email</h4><p>Gmail App Password, SMTP trong <code>app_config.dart</code>, đăng ký bằng OTP 6 số, 8 kịch bản kiểm thử.</p></a>
+</div>
+<div class="note info">Bài tập 2 dùng lại Firebase đã cấu hình ở Bài tập 1, nên hãy làm <strong>theo đúng thứ tự</strong>.</div>
+<h3>Luồng hoạt động của app</h3>
+<div class="flow">
+  <div class="flowcol"><h4>Đăng ký (Bài 2)</h4>
+  <ol><li>Nhập tên, email, mật khẩu.</li><li>App kiểm tra email đã có trên Firebase chưa (<code>registered_emails</code>). Có rồi thì báo lỗi.</li><li>Chưa có: sinh OTP 6 số, gửi qua email (SMTP).</li><li>Nhập OTP. Sai hoặc hết hạn thì báo lỗi, cho gửi lại.</li><li>Đúng: tạo tài khoản Firebase Auth, lưu <code>users/{uid}</code>, quay về Đăng nhập.</li></ol></div>
+  <div class="flowcol"><h4>Đăng nhập</h4>
+  <ul><li>Email + mật khẩu (Firebase Auth)</li><li>Google: <code>google_sign_in</code> → Firebase Auth → lưu <code>users/{uid}</code> (Bài 1)</li></ul>
+  <h4>Mục tiêu học tập</h4>
+  <ul><li>Cấu hình Firebase: Authentication, Firestore, Security Rules</li><li>Đăng ký app Android, thêm SHA, dùng FlutterFire CLI</li><li>Tích hợp Google Sign-In (OAuth 2.0)</li><li>Gửi và xác thực OTP: hết hạn, giới hạn lần thử, dùng một lần</li><li>Hiểu vì sao demo này chưa đủ an toàn cho hệ thống thật</li></ul></div>
+</div>
+<h3>Công cụ cần có</h3>
+<div class="tablewrap"><table><thead><tr><th>Công cụ</th><th>Kiểm tra</th><th>Ghi chú</th></tr></thead><tbody><tr><td>Flutter SDK (Dart ≥ 3.3)</td><td><code>flutter --version</code></td><td></td></tr><tr><td>JDK 17</td><td><code>java -version</code></td><td>Gradle và <code>keytool</code> dùng</td></tr><tr><td>Node.js + npm</td><td><code>node -v</code></td><td>Cài Firebase CLI</td></tr><tr><td>Git</td><td><code>git --version</code></td><td>Clone project</td></tr><tr><td>Android Studio / điện thoại Android</td><td><code>flutter devices</code></td><td>Máy ảo nên có <strong>Google Play</strong></td></tr></tbody></table></div>
+<ul><li>Tài khoản Google để vào Firebase Console</li><li>Gmail đã bật <strong>Xác minh 2 bước</strong> (để tạo App Password, Bài 2)</li><li>Kết nối Internet</li></ul>
+</section><section id="chuan-bi">
+<h2>Chuẩn bị: clone project</h2>
+<p>Project có 2 nhánh: <strong><code>main</code></strong> là bản khởi đầu (chưa cấu hình Firebase và SMTP) dùng để thực hành; <strong><code>completed</code></strong> là bản hoàn chỉnh dùng để đối chiếu.</p>
+<article class="step" id="c1"><header><h3>Bước 1. Clone và tạo nhánh làm bài</h3><label class="done"><input type="checkbox" data-step="c1"> Đã xong</label></header><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>git clone https://github.com/AgentMeap/flutter_authentication.git
+cd flutter_authentication
+git switch -c my-practice</code></pre></div><p>Làm trên nhánh <code>my-practice</code> để không ảnh hưởng <code>main</code>.</p></article>
+<article class="step" id="c2"><header><h3>Bước 2. Cài dependencies</h3><label class="done"><input type="checkbox" data-step="c2"> Đã xong</label></header><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>flutter pub get</code></pre></div><p>Thư mục <code>android/</code> và <code>ios/</code> đã có sẵn. Chỉ khi thiếu mới chạy (không ghi đè <code>pubspec.yaml</code> và <code>lib/</code>):</p><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>flutter create . --project-name flutter_otp_demo --platforms=android,ios</code></pre></div><div class="note info">Nếu <code>flutter create</code> sinh <code>test/widget_test.dart</code> mặc định (test bộ đếm) thì <strong>xoá file này</strong>.</div></article>
+<article class="step" id="c3"><header><h3>Bước 3. Cài Firebase CLI và FlutterFire CLI</h3><label class="done"><input type="checkbox" data-step="c3"> Đã xong</label></header><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>npm install -g firebase-tools
+firebase login
+dart pub global activate flutterfire_cli</code></pre></div><p>Kiểm tra: <code>firebase projects:list</code> liệt kê được project, <code>flutterfire --version</code> chạy được.</p><div class="note info"><strong>Windows:</strong> nếu không thấy lệnh <code>flutterfire</code>, thêm <code>%LOCALAPPDATA%\Pub\Cache\bin</code> vào <strong>PATH</strong> rồi mở lại terminal.</div></article>
+<details><summary>Cấu trúc project</summary>
+<div class="tablewrap"><table><thead><tr><th>Tệp / thư mục</th><th>Vai trò</th></tr></thead><tbody><tr><td><code>lib/main.dart</code></td><td>Khởi tạo Firebase, <code>AuthGate</code> (Login ↔ Home)</td></tr><tr><td><code>lib/firebase_options.dart</code></td><td>Cấu hình Firebase (sinh bởi <code>flutterfire configure</code>)</td></tr><tr><td><code>lib/config/app_config.dart</code></td><td>Cấu hình SMTP và quy tắc OTP</td></tr><tr><td><code>lib/services/auth_service.dart</code></td><td>Firebase Auth + Firestore + Google Sign-In</td></tr><tr><td><code>lib/services/otp_service.dart</code></td><td>Sinh, băm, xác thực OTP</td></tr><tr><td><code>lib/services/email_service.dart</code></td><td>Gửi OTP qua Gmail SMTP</td></tr><tr><td><code>lib/screens/</code></td><td><code>login</code>, <code>register</code>, <code>otp</code>, <code>home</code></td></tr><tr><td><code>test/otp_service_test.dart</code></td><td>Unit test OTP</td></tr><tr><td><code>firestore.rules</code></td><td>Firestore Security Rules</td></tr></tbody></table></div></details>
+<details><summary>Đối chiếu với bản hoàn chỉnh (không bắt buộc)</summary>
+<div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>git fetch
+git diff my-practice origin/completed --stat</code></pre></div>
+<div class="note info">Nhánh <code>completed</code> dùng <code>firebase_options.dart</code> mẫu, bạn vẫn phải tự chạy <code>flutterfire configure</code> với Firebase project của mình. Mỗi máy có SHA khác nhau, nên mỗi người tự thêm SHA của máy mình.</div></details>
+</section><section id="bai-1"><h2>Bài tập 1 – Firebase Google Sign-In</h2><p><strong>Mục tiêu:</strong> cấu hình Firebase cho app và đăng nhập thành công bằng Google; hồ sơ người dùng được lưu trên Firestore.</p><article class="step" id="b1s1"><header><h3>Bước 1. Tạo project Firebase</h3><label class="done"><input type="checkbox" data-step="b1s1"> Đã xong</label></header><ul><li>Mở <a href="https://firebase.google.com," target="_blank" rel="noopener">https://firebase.google.com,</a> bấm <strong>Go to console</strong> (chưa đăng nhập thì <strong>Sign in</strong> bằng Google) <span class="ref">Hình 1</span> <span class="ref">Hình 2</span>.</li><li>Bấm <strong>Create a new Firebase project</strong> <span class="ref">Hình 3</span>.</li><li>Đặt tên (ví dụ <code>test</code>), bấm <strong>Continue</strong> <span class="ref">Hình 4</span>.</li><li>Gemini in Firebase <span class="ref">Hình 5</span> và Google Analytics (có thể tắt) <span class="ref">Hình 6</span>: giữ mặc định. Nếu bật Analytics, chọn quốc gia, đồng ý điều khoản, <strong>Create project</strong> <span class="ref">Hình 7</span>.</li><li>Project tạo xong, mở nó từ danh sách <span class="ref">Hình 8</span>.</li></ul><div class="note info">ID project do Firebase tự sinh nên sẽ khác trong ảnh.</div><div class="figs"><figure id="hinh-1"><a href="img/home.jpg" class="zoom"><img src="img/home.jpg" loading="lazy" alt="Trang chủ firebase.google.com: bấm Go to console"></a><figcaption><b>Hình 1.</b> Trang chủ firebase.google.com: bấm Go to console</figcaption></figure><figure id="hinh-2"><a href="img/console.jpg" class="zoom"><img src="img/console.jpg" loading="lazy" alt="Đã đăng nhập: bấm Go to console"></a><figcaption><b>Hình 2.</b> Đã đăng nhập: bấm Go to console</figcaption></figure><figure id="hinh-3"><a href="img/newproj.jpg" class="zoom"><img src="img/newproj.jpg" loading="lazy" alt="Bấm Create a new Firebase project"></a><figcaption><b>Hình 3.</b> Bấm Create a new Firebase project</figcaption></figure><figure id="hinh-4"><a href="img/name.jpg" class="zoom"><img src="img/name.jpg" loading="lazy" alt="Đặt tên project (ví dụ test) rồi Continue"></a><figcaption><b>Hình 4.</b> Đặt tên project (ví dụ test) rồi Continue</figcaption></figure><figure id="hinh-5"><a href="img/gemini.jpg" class="zoom"><img src="img/gemini.jpg" loading="lazy" alt="Bước Gemini in Firebase: giữ mặc định, Continue"></a><figcaption><b>Hình 5.</b> Bước Gemini in Firebase: giữ mặc định, Continue</figcaption></figure><figure id="hinh-6"><a href="img/analytics.jpg" class="zoom"><img src="img/analytics.jpg" loading="lazy" alt="Bước Google Analytics (có thể tắt): Continue"></a><figcaption><b>Hình 6.</b> Bước Google Analytics (có thể tắt): Continue</figcaption></figure><figure id="hinh-7"><a href="img/country.jpg" class="zoom"><img src="img/country.jpg" loading="lazy" alt="Chọn quốc gia, đồng ý điều khoản, Create project"></a><figcaption><b>Hình 7.</b> Chọn quốc gia, đồng ý điều khoản, Create project</figcaption></figure><figure id="hinh-8"><a href="img/list.jpg" class="zoom"><img src="img/list.jpg" loading="lazy" alt="Project mới xuất hiện trong danh sách"></a><figcaption><b>Hình 8.</b> Project mới xuất hiện trong danh sách</figcaption></figure></div></article><article class="step" id="b1s2"><header><h3>Bước 2. Bật Authentication: Email/Password và Google</h3><label class="done"><input type="checkbox" data-step="b1s2"> Đã xong</label></header><ul><li>Mở <strong>Security → Authentication</strong> <span class="ref">Hình 9</span>, bấm <strong>Get started</strong> <span class="ref">Hình 10</span>.</li><li>Tab <strong>Sign-in method</strong>: chọn <strong>Email/Password</strong> <span class="ref">Hình 11</span>, bật dòng đầu tiên (không cần *Email link*), <strong>Save</strong>.</li><li>Chọn <strong>Google</strong> <span class="ref">Hình 12</span>, bật <strong>Enable</strong>, chọn *Project support email*, <strong>Save</strong> <span class="ref">Hình 13</span>.</li></ul><div class="note warn">Email/Password dùng cho Bài 2, Google dùng cho Bài 1. Quên *support email* thì đăng nhập Google lỗi <code>ApiException: 12500</code>.</div><div class="figs"><figure id="hinh-9"><a href="img/menuAuth.jpg" class="zoom"><img src="img/menuAuth.jpg" loading="lazy" alt="Mở Authentication từ menu Security"></a><figcaption><b>Hình 9.</b> Mở Authentication từ menu Security</figcaption></figure><figure id="hinh-10"><a href="img/authStart.jpg" class="zoom"><img src="img/authStart.jpg" loading="lazy" alt="Trang Authentication: bấm Get started"></a><figcaption><b>Hình 10.</b> Trang Authentication: bấm Get started</figcaption></figure><figure id="hinh-11"><a href="img/signIn.jpg" class="zoom"><img src="img/signIn.jpg" loading="lazy" alt="Tab Sign-in method: chọn Email/Password"></a><figcaption><b>Hình 11.</b> Tab Sign-in method: chọn Email/Password</figcaption></figure><figure id="hinh-12"><a href="img/googlePick.jpg" class="zoom"><img src="img/googlePick.jpg" loading="lazy" alt="Chọn Google (Email/Password đã có dấu tick)"></a><figcaption><b>Hình 12.</b> Chọn Google (Email/Password đã có dấu tick)</figcaption></figure><figure id="hinh-13"><a href="img/googleCfg.jpg" class="zoom"><img src="img/googleCfg.jpg" loading="lazy" alt="Bật Enable, chọn Support email, Save"></a><figcaption><b>Hình 13.</b> Bật Enable, chọn Support email, Save</figcaption></figure></div></article><article class="step" id="b1s3"><header><h3>Bước 3. Tạo Firestore Database</h3><label class="done"><input type="checkbox" data-step="b1s3"> Đã xong</label></header><ul><li><strong>Databases &amp; Storage → Firestore</strong>, bấm <strong>Create database</strong> <span class="ref">Hình 14</span>.</li><li>Chọn <strong>Standard edition</strong>, <strong>Next</strong> <span class="ref">Hình 15</span>.</li><li>Database ID để <code>(default)</code>. Location gần Việt Nam, ví dụ <code>asia-southeast1</code> (Singapore), <strong>Next</strong> <span class="ref">Hình 16</span>.</li><li>Chọn <strong>Start in production mode</strong>, <strong>Next</strong> <span class="ref">Hình 17</span>.</li><li>Bỏ qua *Scheduled backups*, bấm <strong>Create</strong> <span class="ref">Hình 18</span>.</li><li>Tạo xong, chuyển sang tab <strong>Rules</strong> <span class="ref">Hình 19</span>.</li></ul><div class="figs"><figure id="hinh-14"><a href="img/fsIntro.jpg" class="zoom"><img src="img/fsIntro.jpg" loading="lazy" alt="Mở Firestore từ Databases &amp; Storage, bấm Create database"></a><figcaption><b>Hình 14.</b> Mở Firestore từ Databases &amp; Storage, bấm Create database</figcaption></figure><figure id="hinh-15"><a href="img/fsEdition.jpg" class="zoom"><img src="img/fsEdition.jpg" loading="lazy" alt="Chọn Standard edition, Next"></a><figcaption><b>Hình 15.</b> Chọn Standard edition, Next</figcaption></figure><figure id="hinh-16"><a href="img/fsLocation.jpg" class="zoom"><img src="img/fsLocation.jpg" loading="lazy" alt="Database ID (default), chọn Location asia-southeast"></a><figcaption><b>Hình 16.</b> Database ID (default), chọn Location asia-southeast</figcaption></figure><figure id="hinh-17"><a href="img/fsMode.jpg" class="zoom"><img src="img/fsMode.jpg" loading="lazy" alt="Chọn Start in production mode, Next"></a><figcaption><b>Hình 17.</b> Chọn Start in production mode, Next</figcaption></figure><figure id="hinh-18"><a href="img/fsBackup.jpg" class="zoom"><img src="img/fsBackup.jpg" loading="lazy" alt="Bỏ qua Scheduled backups, bấm Create"></a><figcaption><b>Hình 18.</b> Bỏ qua Scheduled backups, bấm Create</figcaption></figure><figure id="hinh-19"><a href="img/fsReady.jpg" class="zoom"><img src="img/fsReady.jpg" loading="lazy" alt="Database tạo xong: mở tab Rules"></a><figcaption><b>Hình 19.</b> Database tạo xong: mở tab Rules</figcaption></figure></div></article><article class="step" id="b1s4"><header><h3>Bước 4. Publish Firestore Security Rules</h3><label class="done"><input type="checkbox" data-step="b1s4"> Đã xong</label></header><ul><li>Tab <strong>Rules</strong> đang chứa rules mặc định, từ chối mọi truy cập <span class="ref">Hình 20</span>.</li><li>Xoá hết, dán toàn bộ file <code>firestore.rules</code> (bên dưới), bấm <strong>Publish</strong> <span class="ref">Hình 21</span>.</li><li>Kiểm tra rules đã Publish <span class="ref">Hình 22</span>.</li></ul><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>rules_version = &#x27;2&#x27;;
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Hồ sơ người dùng: chỉ chính chủ đọc/ghi.
+    match /users/{uid} {
+      allow read, write: if request.auth != null &amp;&amp; request.auth.uid == uid;
+    }
+
+    // Đánh dấu email đã đăng ký (kiểm tra trùng TRƯỚC khi gửi OTP).
+    // - get: cho phép khi chưa đăng nhập (người dùng đang đăng ký)
+    // - list: cấm, tránh liệt kê toàn bộ email
+    // - create: chỉ khi đã đăng nhập (sau khi tài khoản được tạo)
+    match /registered_emails/{key} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+  }
+}</code></pre></div><div class="figs"><figure id="hinh-20"><a href="img/rulesDefault.jpg" class="zoom"><img src="img/rulesDefault.jpg" loading="lazy" alt="Rules mặc định từ chối mọi truy cập"></a><figcaption><b>Hình 20.</b> Rules mặc định từ chối mọi truy cập</figcaption></figure><figure id="hinh-21"><a href="img/rulesPaste.jpg" class="zoom"><img src="img/rulesPaste.jpg" loading="lazy" alt="Dán rules của project rồi Publish"></a><figcaption><b>Hình 21.</b> Dán rules của project rồi Publish</figcaption></figure><figure id="hinh-22"><a href="img/rulesDone.jpg" class="zoom"><img src="img/rulesDone.jpg" loading="lazy" alt="Rules đã được Publish"></a><figcaption><b>Hình 22.</b> Rules đã được Publish</figcaption></figure></div></article><article class="step" id="b1s5"><header><h3>Bước 5. Lấy SHA-1 / SHA-256 của máy build</h3><label class="done"><input type="checkbox" data-step="b1s5"> Đã xong</label></header><p>SHA là <strong>bắt buộc</strong> để Google Sign-In chạy trên Android. Có 2 cách:</p><p><strong>Cách 1 – Gradle:</strong></p><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>cd android
+./gradlew signingReport             # Windows: .\gradlew signingReport</code></pre></div><p>Tìm khối <code>Variant: debug</code>, copy dòng <code>SHA1</code> và <code>SHA-256</code>.</p><p><strong>Cách 2 – đọc debug keystore:</strong></p><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>keytool -list -v -alias androiddebugkey -storepass android -keypass android \
+  -keystore ~/.android/debug.keystore
+# Windows: -keystore %USERPROFILE%\.android\debug.keystore</code></pre></div><div class="note info">Mỗi máy có debug keystore <strong>khác nhau</strong>, nên mỗi thành viên trong nhóm phải thêm SHA của máy mình.</div></article><article class="step" id="b1s6"><header><h3>Bước 6. Đăng ký app Android và thêm SHA</h3><label class="done"><input type="checkbox" data-step="b1s6"> Đã xong</label></header><ul><li>Project Overview, chọn biểu tượng <strong>Android</strong> <span class="ref">Hình 23</span>.</li><li><strong>Android package name:</strong> <code>com.example.flutter_otp_demo</code> (trùng <code>applicationId</code> trong <code>android/app/build.gradle.kts</code>), <strong>Register app</strong> <span class="ref">Hình 24</span>.</li><li>Có thể đóng (X) cửa sổ hướng dẫn sau khi Register: tải file cấu hình và thêm SDK làm ở Bước 7, 8. App đã xuất hiện <span class="ref">Hình 25</span>.</li><li>Bấm bánh răng cạnh tên app, mở <strong>Project settings</strong> <span class="ref">Hình 26</span>.</li><li>Mục <strong>Your apps</strong> (Android), <strong>Add fingerprint</strong> <span class="ref">Hình 27</span>, dán <strong>SHA-1</strong>, <strong>Save</strong>. Lặp lại với <strong>SHA-256</strong> <span class="ref">Hình 28</span>.</li></ul><div class="figs"><figure id="hinh-23"><a href="img/addAndroid.jpg" class="zoom"><img src="img/addAndroid.jpg" loading="lazy" alt="Project Overview: chọn biểu tượng Android"></a><figcaption><b>Hình 23.</b> Project Overview: chọn biểu tượng Android</figcaption></figure><figure id="hinh-24"><a href="img/register.jpg" class="zoom"><img src="img/register.jpg" loading="lazy" alt="Nhập Android package name rồi Register app"></a><figcaption><b>Hình 24.</b> Nhập Android package name rồi Register app</figcaption></figure><figure id="hinh-25"><a href="img/appAdded.jpg" class="zoom"><img src="img/appAdded.jpg" loading="lazy" alt="App Android đã xuất hiện"></a><figcaption><b>Hình 25.</b> App Android đã xuất hiện</figcaption></figure><figure id="hinh-26"><a href="img/gear.jpg" class="zoom"><img src="img/gear.jpg" loading="lazy" alt="Bấm bánh răng để mở Project settings"></a><figcaption><b>Hình 26.</b> Bấm bánh răng để mở Project settings</figcaption></figure><figure id="hinh-27"><a href="img/addFp.jpg" class="zoom"><img src="img/addFp.jpg" loading="lazy" alt="Your apps (Android): bấm Add fingerprint"></a><figcaption><b>Hình 27.</b> Your apps (Android): bấm Add fingerprint</figcaption></figure><figure id="hinh-28"><a href="img/shaDone.jpg" class="zoom"><img src="img/shaDone.jpg" loading="lazy" alt="SHA-1 đã được thêm (giá trị được che)"></a><figcaption><b>Hình 28.</b> SHA-1 đã được thêm (giá trị được che)</figcaption></figure></div></article><article class="step" id="b1s7"><header><h3>Bước 7. Kết nối app với Firebase (sinh file cấu hình)</h3><label class="done"><input type="checkbox" data-step="b1s7"> Đã xong</label></header><div class="note warn"><strong>Làm SAU Bước 6</strong> để file cấu hình có OAuth client cho Google Sign-In.</div><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>flutterfire configure</code></pre></div><ul><li>Chọn project vừa tạo, tick <strong>android</strong> (và <strong>ios</strong> nếu cần).</li><li>Khi hỏi cập nhật Gradle (Google Services plugin) thì chọn <strong>yes</strong>.</li></ul><div class="tablewrap"><table><thead><tr><th>Tệp tạo ra</th><th>Vai trò</th></tr></thead><tbody><tr><td><code>lib/firebase_options.dart</code></td><td>Thay file placeholder; chứa <code>apiKey</code>, <code>appId</code>, <code>projectId</code>…</td></tr><tr><td><code>android/app/google-services.json</code></td><td>Cấu hình Android, có OAuth client cho Google Sign-In</td></tr><tr><td><code>ios/Runner/GoogleService-Info.plist</code></td><td>Chỉ có khi chọn iOS</td></tr><tr><td><code>firebase.json</code></td><td>Ghi lại cấu hình FlutterFire</td></tr></tbody></table></div><details><summary>Cách thủ công (không cần Firebase CLI / FlutterFire CLI) – chỉ Android</summary><ol><li>Firebase Console → *Project settings → Your apps (Android)* → <strong>Download google-services.json</strong>, đặt vào <code>android/app/google-services.json</code>.</li><li>Ghi đè <code>lib/firebase_options.dart</code> bằng đoạn mã dưới, thay giá trị theo bảng ánh xạ.</li></ol><div class="tablewrap"><table><thead><tr><th>Trường trong <code>FirebaseOptions</code></th><th>Lấy từ <code>google-services.json</code></th></tr></thead><tbody><tr><td><code>apiKey</code></td><td><code>client[0].api_key[0].current_key</code></td></tr><tr><td><code>appId</code></td><td><code>client[0].client_info.mobilesdk_app_id</code></td></tr><tr><td><code>messagingSenderId</code></td><td><code>project_info.project_number</code></td></tr><tr><td><code>projectId</code></td><td><code>project_info.project_id</code></td></tr><tr><td><code>storageBucket</code></td><td><code>project_info.storage_bucket</code></td></tr></tbody></table></div><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>import &#x27;package:firebase_core/firebase_core.dart&#x27; show FirebaseOptions;
+import &#x27;package:flutter/foundation.dart&#x27;
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+class DefaultFirebaseOptions {
+  DefaultFirebaseOptions._();
+
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      throw UnsupportedError(&#x27;Chưa cấu hình Firebase cho Web.&#x27;);
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      default:
+        throw UnsupportedError(
+          &#x27;Chưa cấu hình Firebase cho $defaultTargetPlatform. &#x27;
+          &#x27;Hãy chạy &quot;flutterfire configure&quot; và chọn thêm nền tảng này.&#x27;,
+        );
+    }
+  }
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: &#x27;AIza...&#x27;,                          // current_key
+    appId: &#x27;1:123456789:android:abcdef...&#x27;,     // mobilesdk_app_id
+    messagingSenderId: &#x27;123456789&#x27;,             // project_number
+    projectId: &#x27;ten-project&#x27;,                   // project_id
+    storageBucket: &#x27;ten-project.firebasestorage.app&#x27;,
+  );
+}</code></pre></div><div class="note info">Cách này chỉ cấu hình <strong>Android</strong>. Sau khi thêm SHA mới ở Bước 6, nhớ <strong>tải lại</strong> <code>google-services.json</code>.</div></details></article><article class="step" id="b1s8"><header><h3>Bước 8. Kiểm tra plugin Google Services trong Gradle</h3><label class="done"><input type="checkbox" data-step="b1s8"> Đã xong</label></header><p><code>GoogleSignIn()</code> trong <code>auth_service.dart</code> không truyền <code>serverClientId</code>, nên trên Android plugin <code>com.google.gms.google-services</code> là <strong>bắt buộc</strong>. Nếu <code>flutterfire configure</code> chưa thêm, tự thêm dòng có chú thích <code>thêm</code> (Firebase cũng gợi ý như <span class="ref">Hình 29</span>).</p><div class="figs"><figure id="hinh-29"><a href="img/gradle.jpg" class="zoom"><img src="img/gradle.jpg" loading="lazy" alt="Firebase gợi ý thêm Google services plugin vào 2 file Gradle"></a><figcaption><b>Hình 29.</b> Firebase gợi ý thêm Google services plugin vào 2 file Gradle</figcaption></figure></div><p><code>android/settings.gradle.kts</code>:</p><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>plugins {
+    id(&quot;dev.flutter.flutter-plugin-loader&quot;) version &quot;1.0.0&quot;
+    id(&quot;com.android.application&quot;) version &quot;...&quot; apply false
+    id(&quot;org.jetbrains.kotlin.android&quot;) version &quot;...&quot; apply false
+    id(&quot;com.google.gms.google-services&quot;) version &quot;4.4.2&quot; apply false   // thêm
+}</code></pre></div><p><code>android/app/build.gradle.kts</code>:</p><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>plugins {
+    id(&quot;com.android.application&quot;)
+    id(&quot;com.google.gms.google-services&quot;)                                 // thêm
+    id(&quot;dev.flutter.flutter-gradle-plugin&quot;)
+}</code></pre></div><div class="note info">Lỗi <code>minSdk</code> thì đặt <code>minSdk = 23</code> trong <code>android/app/build.gradle.kts</code>.</div></article><article class="step" id="b1s9"><header><h3>Bước 9. Chạy app và đăng nhập Google</h3><label class="done"><input type="checkbox" data-step="b1s9"> Đã xong</label></header><p>Mở máy ảo Android (hoặc điện thoại bật *USB debugging*):</p><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>flutter emulators
+flutter emulators --launch &lt;emulator_id&gt;   # ví dụ Pixel_7
+flutter devices                            # phải thấy thiết bị android</code></pre></div><div class="note info">Máy ảo phải dùng image <strong>có Google Play</strong>, nếu không sẽ lỗi <code>ApiException: 12500</code>. Lần đầu cần đăng nhập một tài khoản Google trong *Settings* của máy ảo.</div><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>flutter clean
+flutter pub get
+flutter run     # chọn thiết bị android (đừng chọn Chrome/Edge)</code></pre></div><div class="note info">Lần build Android đầu khá lâu (5–10 phút). Flutter Web <strong>không</strong> được hỗ trợ.</div><p>Kiểm tra:</p><ol><li>Bấm <strong>Đăng nhập bằng Google</strong>, chọn tài khoản: vào Trang chủ, thấy tên, email và nhãn <strong>Google</strong>.</li><li>Firebase Console → <strong>Authentication → Users</strong>: có người dùng mới (provider Google).</li><li><strong>Firestore → users</strong>: có document <code>users/{uid}</code>, <code>providers</code> chứa <code>google.com</code>.</li><li>Bấm <strong>Đăng xuất</strong>: quay về màn Đăng nhập.</li></ol></article><div class="expect"><h4>Kết quả mong đợi</h4><ul><li>Đăng nhập Google thành công, Trang chủ hiển thị thông tin tài khoản</li><li>Có người dùng mới trong Authentication → Users</li><li>Có document <code>users/{uid}</code> trên Firestore</li><li>Đăng xuất quay về màn Đăng nhập</li></ul></div></section><section id="bai-2"><h2>Bài tập 2 – OTP qua email khi đăng ký</h2><p><strong>Mục tiêu:</strong> hoàn thiện cấu hình gửi OTP và xác thực OTP trong luồng đăng ký. Cần Firebase đã cấu hình xong ở Bài 1.</p><article class="step" id="b2s1"><header><h3>Bước 1. Tạo App Password cho Gmail</h3><label class="done"><input type="checkbox" data-step="b2s1"> Đã xong</label></header><ol><li>Với Gmail dùng để gửi OTP, bật <strong>Xác minh 2 bước</strong>.</li><li>Mở <a href="https://myaccount.google.com/apppasswords," target="_blank" rel="noopener">https://myaccount.google.com/apppasswords,</a> tạo <strong>Mật khẩu ứng dụng</strong> (16 ký tự).</li></ol></article><article class="step" id="b2s2"><header><h3>Bước 2. Điền SMTP vào app_config.dart</h3><label class="done"><input type="checkbox" data-step="b2s2"> Đã xong</label></header><p>Sửa <code>lib/config/app_config.dart</code>:</p><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>static const String smtpUser = &#x27;ten_ban@gmail.com&#x27;;
+static const String smtpAppPassword = &#x27;abcd efgh ijkl mnop&#x27;;</code></pre></div><ul><li>App Password gồm <strong>16 chữ cái</strong>, viết liền hay có dấu cách đều được.</li><li><strong>Không</strong> dùng mật khẩu Gmail thường (lỗi <code>535 Username and Password not accepted</code>).</li></ul><div class="note warn"><strong>Bảo mật:</strong> App Password nằm trong mã nguồn. <strong>Không</strong> push <code>app_config.dart</code> có mật khẩu thật lên GitHub công khai. Nếu lỡ lộ, xoá ở <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">https://myaccount.google.com/apppasswords</a> và tạo mới.</div><div class="note info"><strong>Chưa cấu hình SMTP?</strong> App vẫn chạy ở *chế độ dev*: không gửi email, mã OTP được in ra <strong>Debug Console / logcat</strong>.</div></article><article class="step" id="b2s3"><header><h3>Bước 3. Chạy app và đăng ký bằng email thật</h3><label class="done"><input type="checkbox" data-step="b2s3"> Đã xong</label></header><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>flutter run</code></pre></div><ul><li>Ở màn Đăng nhập bấm <strong>Đăng ký</strong>, nhập tên, email truy cập được, mật khẩu (tối thiểu 8 ký tự, gồm chữ và số).</li><li>Email OTP đến trong vài giây (xem cả thư mục <strong>Spam</strong>).</li><li>Gửi lỗi thì thông báo hiện trên màn hình và trong Debug Console.</li></ul></article><article class="step" id="b2s4"><header><h3>Bước 4. Chạy 8 kịch bản kiểm thử OTP</h3><label class="done"><input type="checkbox" data-step="b2s4"> Đã xong</label></header><div class="tablewrap"><table><thead><tr><th>#</th><th>Thao tác</th><th>Kết quả mong đợi</th></tr></thead><tbody><tr><td>1</td><td>Đăng ký email mới</td><td>Nhận email OTP 6 số</td></tr><tr><td>2</td><td>Nhập sai OTP</td><td>Báo sai và số lần thử còn lại</td></tr><tr><td>3</td><td>Nhập sai 5 lần</td><td>Mã bị huỷ, phải gửi lại</td></tr><tr><td>4</td><td>Chờ quá 5 phút rồi nhập</td><td>Báo hết hạn</td></tr><tr><td>5</td><td>Nhập đúng OTP</td><td>Tạo tài khoản, quay về Đăng nhập (đã điền sẵn email)</td></tr><tr><td>6</td><td>Đăng ký lại cùng email</td><td>Báo email đã tồn tại, <strong>không</strong> gửi OTP</td></tr><tr><td>7</td><td>Đăng nhập email + mật khẩu</td><td>Vào Trang chủ, thấy hồ sơ từ Firestore</td></tr><tr><td>8</td><td>Đăng xuất, đăng nhập Google</td><td>Vào Trang chủ, hồ sơ Google lưu trên Firestore</td></tr></tbody></table></div><p>Kiểm chứng trong Firebase Console: <strong>Authentication → Users</strong> và <strong>Firestore → users / registered_emails</strong>.</p></article><article class="step" id="b2s5"><header><h3>Bước 5. Tìm hiểu quy tắc bảo mật OTP</h3><label class="done"><input type="checkbox" data-step="b2s5"> Đã xong</label></header><p>Đọc <code>lib/config/app_config.dart</code> và <code>lib/services/otp_service.dart</code>, đối chiếu:</p><div class="tablewrap"><table><thead><tr><th>Quy tắc</th><th>Giá trị</th><th>Vị trí</th></tr></thead><tbody><tr><td>Độ dài mã</td><td>6 chữ số</td><td><code>AppConfig.otpLength</code></td></tr><tr><td>Hiệu lực</td><td>5 phút</td><td><code>AppConfig.otpTtl</code></td></tr><tr><td>Sai tối đa</td><td>5 lần</td><td><code>AppConfig.maxOtpAttempts</code></td></tr><tr><td>Chờ gửi lại</td><td>60 giây</td><td><code>AppConfig.resendCooldown</code></td></tr><tr><td>Sinh mã an toàn</td><td><code>Random.secure</code></td><td><code>OtpService.generate</code></td></tr><tr><td>Chỉ lưu bản băm</td><td>SHA-256 + salt</td><td><code>OtpService</code></td></tr><tr><td>Dùng một lần</td><td>Đúng là huỷ mã</td><td><code>OtpService.verify</code></td></tr></tbody></table></div><p>Khác biệt giữa demo và hệ thống thật:</p><ul><li><strong>OTP sinh và kiểm tra ngay trong app</strong>, nên có thể bị can thiệp. Thực tế phải sinh và xác thực OTP ở <strong>server</strong> (Cloud Functions, backend riêng) và chỉ tạo tài khoản khi server xác nhận.</li><li><strong>Thông tin SMTP nằm trong app</strong>, có thể bị trích từ APK. Thực tế gửi mail từ server hoặc dùng SendGrid / Firebase Extension *Trigger Email*.</li><li><code>registered_emails</code> chỉ cho <code>get</code> (không <code>list</code>) để hạn chế dò danh sách email, nhưng vẫn có thể dò từng email. Đây là đánh đổi để kiểm tra trùng trước khi gửi OTP.</li><li>Package <code>mailer</code> dùng socket, chạy Android/iOS, <strong>không</strong> chạy Flutter Web.</li></ul></article><article class="step" id="b2s6"><header><h3>Bước 6. Chạy unit test OTP</h3><label class="done"><input type="checkbox" data-step="b2s6"> Đã xong</label></header><div class="code"><button class="copy" type="button" aria-label="Sao chép">Sao chép</button><pre><code>flutter test</code></pre></div><div class="note info">Nếu lỗi <code>Counter increments smoke test</code>, xoá <code>test/widget_test.dart</code> mặc định.</div></article><div class="expect"><h4>Kết quả mong đợi</h4><ul><li>Nhận email OTP 6 số</li><li>OTP sai, hết hạn hoặc sai quá 5 lần đều bị từ chối với thông báo phù hợp</li><li>Đúng OTP thì tạo được tài khoản và quay về Đăng nhập</li><li>Đăng ký lại cùng email bị chặn, không gửi OTP</li><li>Đăng nhập được bằng email và mật khẩu vừa đăng ký</li><li><code>flutter test</code> chạy qua</li></ul></div></section><section id="checklist"><h2>Checklist cuối cùng</h2><ul class="checklist"><li><label><input type="checkbox" data-step="ck0"> <span><code>lib/firebase_options.dart</code> không còn dòng <code>FILE TẠM (placeholder)</code></span></label></li><li><label><input type="checkbox" data-step="ck1"> <span>Có <code>android/app/google-services.json</code>, <code>package_name</code> là <code>com.example.flutter_otp_demo</code></span></label></li><li><label><input type="checkbox" data-step="ck2"> <span><code>google-services.json</code> có <code>oauth_client</code> với <code>client_type: 3</code> (nếu trống thì chưa thêm SHA)</span></label></li><li><label><input type="checkbox" data-step="ck3"> <span>Đã thêm plugin <code>com.google.gms.google-services</code> vào 2 file Gradle</span></label></li><li><label><input type="checkbox" data-step="ck4"> <span>Authentication đã bật <strong>Email/Password</strong> và <strong>Google</strong></span></label></li><li><label><input type="checkbox" data-step="ck5"> <span>Firestore đã tạo database và <strong>Publish</strong> rules</span></label></li><li><label><input type="checkbox" data-step="ck6"> <span>Bài 1: đăng nhập Google và đăng xuất hoạt động</span></label></li><li><label><input type="checkbox" data-step="ck7"> <span>Bài 2: đã điền <code>smtpUser</code>, <code>smtpAppPassword</code> thật để chạy thử (trả về giá trị mẫu trước khi nộp)</span></label></li><li><label><input type="checkbox" data-step="ck8"> <span>Bài 2: 8 kịch bản kiểm thử đạt kết quả mong đợi</span></label></li><li><label><input type="checkbox" data-step="ck9"> <span>Đã xoá <code>test/widget_test.dart</code> mặc định và <code>flutter test</code> chạy qua</span></label></li></ul></section><section id="loi"><h2>Lỗi thường gặp</h2><div class="tablewrap"><table><thead><tr><th>Triệu chứng</th><th>Nguyên nhân / cách sửa</th></tr></thead><tbody><tr><td>App hiện màn hình "Chưa cấu hình Firebase"</td><td>Chưa chạy <code>flutterfire configure</code>, <code>firebase_options.dart</code> vẫn là placeholder</td></tr><tr><td><code>File google-services.json is missing</code></td><td>Đặt file vào <code>android/app/</code> (không phải <code>android/</code>)</td></tr><tr><td>Google: <code>sign_in_failed ... ApiException: 10</code></td><td>Thiếu hoặc sai SHA-1, hoặc chưa tải lại <code>google-services.json</code> sau khi thêm SHA</td></tr><tr><td>Google: <code>ApiException: 12500</code></td><td>Chưa chọn *support email* khi bật Google, hoặc máy ảo không có Google Play</td></tr><tr><td>Bấm Google không có gì xảy ra / <code>default_web_client_id</code> not found</td><td>Thiếu plugin <code>com.google.gms.google-services</code> (Bài 1, Bước 8)</td></tr><tr><td><code>[firebase_auth/operation-not-allowed]</code></td><td>Chưa bật Email/Password hoặc Google trong Sign-in method</td></tr><tr><td><code>[cloud_firestore/permission-denied]</code></td><td>Chưa Publish <code>firestore.rules</code></td></tr><tr><td><code>[cloud_firestore/not-found]</code> / <code>database (default) does not exist</code></td><td>Chưa tạo Firestore database</td></tr><tr><td>OTP: <code>535 Username and Password not accepted</code></td><td>Dùng sai mật khẩu (phải là App Password), hoặc chưa bật Xác minh 2 bước</td></tr><tr><td>Không nhận được email OTP</td><td>Xem thư mục Spam; <code>smtpUser</code> phải đúng Gmail đã tạo App Password</td></tr><tr><td>OTP chỉ in ra console, không gửi email</td><td><code>smtpUser</code> / <code>smtpAppPassword</code> vẫn là giá trị mẫu</td></tr><tr><td><code>flutter test</code> lỗi <code>Counter increments smoke test</code></td><td>Xoá <code>test/widget_test.dart</code> mặc định</td></tr><tr><td><code>flutter run</code> chỉ thấy Chrome / Edge</td><td>Chưa mở máy ảo Android hoặc chưa cắm điện thoại</td></tr><tr><td><code>firebase: command not found</code></td><td>Mở lại terminal; kiểm tra thư mục <code>npm prefix -g</code> có trong PATH</td></tr><tr><td><code>flutterfire: command not found</code></td><td>Thêm <code>%LOCALAPPDATA%\Pub\Cache\bin</code> (Windows) hoặc <code>~/.pub-cache/bin</code> vào PATH</td></tr><tr><td><code>Failed to fetch your Firebase projects</code></td><td>Chưa <code>firebase login</code>, hoặc đăng nhập sai tài khoản</td></tr></tbody></table></div></section>
+</main></div>
+<div id="lb" role="dialog" aria-label="Xem ảnh"><img alt=""></div>
+<script>
+(function(){
+  var KEY='lab-auth-progress';
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
+  function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+  var state=load();
+  var boxes=[].slice.call(document.querySelectorAll('input[data-step]'));
+  function refresh(){
+    var n=0;
+    boxes.forEach(function(b){
+      b.checked=!!state[b.dataset.step]; if(b.checked)n++;
+      var st=b.closest('.step'); if(st) st.classList.toggle('complete',b.checked);
+    });
+    document.getElementById('prog').textContent='Đã xong '+n+'/'+boxes.length+' mục';
+  }
+  boxes.forEach(function(b){b.addEventListener('change',function(){state[b.dataset.step]=b.checked;save(state);refresh();});});
+  document.getElementById('reset').addEventListener('click',function(){if(confirm('Xoá toàn bộ dấu đã xong?')){state={};save(state);refresh();}});
+  refresh();
+  // copy
+  document.querySelectorAll('.copy').forEach(function(btn){btn.addEventListener('click',function(){
+    var t=btn.parentNode.querySelector('code').innerText;
+    function ok(){btn.textContent='Đã chép';setTimeout(function(){btn.textContent='Sao chép'},1500)}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,function(){})}
+    else{var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){}document.body.removeChild(a)}
+  })});
+  // lightbox
+  var lb=document.getElementById('lb'),li=lb.querySelector('img');
+  document.querySelectorAll('a.zoom').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();li.src=a.getAttribute('href');lb.classList.add('open')})});
+  lb.addEventListener('click',function(){lb.classList.remove('open')});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')lb.classList.remove('open')});
+  // theme
+  var root=document.documentElement;
+  try{var th=localStorage.getItem('lab-theme');if(th)root.setAttribute('data-theme',th)}catch(e){}
+  document.getElementById('theme').addEventListener('click',function(){
+    var dark=root.getAttribute('data-theme')?root.getAttribute('data-theme')==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    var n=dark?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem('lab-theme',n)}catch(e){}
+  });
+  // scrollspy + progress bar
+  var links=[].slice.call(document.querySelectorAll('#nav a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  function spy(){
+    var y=window.scrollY+110,cur=0;
+    secs.forEach(function(s,i){if(s.offsetTop<=y)cur=i});
+    links.forEach(function(a,i){a.classList.toggle('on',i===cur)});
+    var h=document.documentElement.scrollHeight-innerHeight;
+    document.getElementById('bar').style.width=(h>0?window.scrollY/h*100:0)+'%';
+  }
+  addEventListener('scroll',spy,{passive:true});spy();
+})();
+</script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 # Flutter OTP & Google Sign-In Demo
 
+> 📖 **Hướng dẫn từng bước (có ảnh):** https://agentmeap.github.io/flutter_authentication/
+
 Project demo **2 phương thức bảo mật tài khoản**:
 
 1. **OTP qua email khi đăng ký** – xác minh quyền sở hữu email trước khi tạo tài khoản.
