@@ -6,8 +6,8 @@ class AppConfig {
   AppConfig._();
 
   // ---- Gmail SMTP (dùng "Mật khẩu ứng dụng" / App Password, KHÔNG dùng mật khẩu Gmail) ----
-  static const String smtpUser = 'YOUR_GMAIL@gmail.com';
-  static const String smtpAppPassword = 'xxxx xxxx xxxx xxxx';
+  static const String smtpUser = 'xxx';
+  static const String smtpAppPassword = 'xxx';
   static const String senderName = 'Flutter OTP Demo';
 
   // ---- Quy tắc OTP ----

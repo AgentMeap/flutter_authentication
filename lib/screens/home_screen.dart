@@ -102,7 +102,12 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Icon(Icons.cloud_done_outlined, color: theme.colorScheme.primary),
                           const SizedBox(width: 8),
-                          Text('Hồ sơ lưu trên Firestore', style: theme.textTheme.titleMedium),
+                          Expanded(
+                            child: Text(
+                              'Hồ sơ lưu trên Firestore',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
                         ],
                       ),
                       const Divider(height: 24),
@@ -143,7 +148,12 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Icon(Icons.security_outlined, color: theme.colorScheme.primary),
                       const SizedBox(width: 8),
-                      Text('2 phương thức bảo mật được demo', style: theme.textTheme.titleMedium),
+                      Expanded(
+                        child: Text(
+                          '2 phương thức bảo mật được demo',
+                          style: theme.textTheme.titleMedium,
+                        ),
+                      ),
                     ],
                   ),
                   const Divider(height: 24),

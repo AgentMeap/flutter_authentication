@@ -32,7 +32,7 @@ class EmailService {
     final minutes = AppConfig.otpTtl.inMinutes;
 
     final message = Message()
-      ..from = Address(AppConfig.smtpUser, AppConfig.senderName)
+      ..from = const Address(AppConfig.smtpUser, AppConfig.senderName)
       ..recipients.add(toEmail.trim())
       ..subject = 'Mã xác thực OTP: $otp'
       ..text = 'Xin chào $name,\n\n'
